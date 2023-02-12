@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "F:\\大学相关\\竞赛\\排产相关赛题\\permutation_optimization\\costfunction",
+        "./costfunction/",
+        "costfunction/"
+    ],
+}
