@@ -16,6 +16,8 @@ def main():
         GenA = genetic(xcount, data)
         GenA.popInit()
         GenA.popDominatSort()
+        GenA.popDistense()
+        a = 1
 
 
 if __name__ == "__main__":
