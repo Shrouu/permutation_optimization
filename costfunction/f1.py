@@ -1,6 +1,7 @@
 import numpy as np
 
 
+# 目标一：焊装车间的切换次数尽可能小（未改动）
 def main(x, data):
     D = len(x)
     data[0] = data[0][0:D,]

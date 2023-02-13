@@ -1,6 +1,6 @@
 import numpy as np
 
-
+# 目标三：四驱车尽量连放且满足数量限制（未改动）
 def main(x, data):
     D = len(x)
     data[0] = data[0][0:D, ]

@@ -13,6 +13,7 @@ class particle:
         self.crowd = 0
 
     def computeCf(self, data):
+        self.cf = []
         self.cf.append(f1(self.varbles, data))
         self.cf.append(f2(self.varbles, data))
         self.cf.append(f3(self.varbles, data))

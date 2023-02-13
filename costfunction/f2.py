@@ -1,6 +1,6 @@
 import numpy as np
 
-
+# 目标二：涂装车间喷漆切换次数尽可能小（有改动）
 def main(x, data):
     D = len(x)
     data[0] = data[0][0:D, ]
@@ -14,13 +14,20 @@ def main(x, data):
             tables[j][3] = tables[j][2]
     for j in range(D - 1):
         k += 1
+        # 若当前车车顶车身不同色，需要清洗
         if tables[j][3] != tables[j][2]:
             f2 += 1
             k = 0
-        if tables[j][2] != tables[j + 1][3]:
+        # 如果是最后一个，不再考虑其后的清洗
+        if(j == D - 2):
+            break
+        # 如果达到连续五次，不管下一个是啥，都要清洗
+        if k == 5:
             f2 += 1
             k = 0
-        elif k == 5:
+            continue  # 这是为了避免重复计算时间
+        # 若当前车车身和下一辆车的车顶颜色不同，需要清洗
+        if tables[j][2] != tables[j + 1][3]:
             f2 += 1
             k = 0
     return f2 / D

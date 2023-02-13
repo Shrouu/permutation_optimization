@@ -7,13 +7,15 @@ class genetic:
     def __init__(self, variblesize, data):
         self.variblesize = variblesize
         self.data = data
-        self.popsize = 200
+        self.popsize = 400
         self.pop = []
         self.newgen = []
-        self.maxcf = []
-        self.mincf = []
+        self.maxcf = [-1, -1, -1]
+        self.mincf = [10, 10, 10]
         self.randseed = 50
+        self.mutationProbability = 0.5
         self.gen = 0
+        self.bestGeneration = []
 
     def popInit(self):
         random.seed(self.randseed)
@@ -21,21 +23,32 @@ class genetic:
             x = np.arange(self.variblesize)
             np.random.shuffle(x)
             pt = particle(x)
-            pt.computeCf(self.data)
             self.pop.append(pt)
-        self.normalizecf()
 
     def normalizecf(self):
         fcount = len(self.pop[0].cf)
         for i in range(fcount):
-            self.maxcf.append(self.pop[0].cf[i])
-            self.mincf.append(self.pop[0].cf[i])
             for pt in self.pop:
                 self.maxcf[i] = max(self.maxcf[i], pt.cf[i])
                 self.mincf[i] = min(self.mincf[i], pt.cf[i])
             d = self.maxcf[i] - self.mincf[i]
             for j in range(self.popsize):
                 self.pop[j].cf[i] = (self.pop[j].cf[i] - self.mincf[i]) / d
+
+    def computeCostfunction(self):
+        for particle in self.pop:
+            particle.computeCf(self.data)
+        self.normalizecf()
+
+    # def newGenNormalizecf(self):
+    #     fcount = len(self.newgen[0].cf)
+    #     for i in range(fcount):
+    #         for pt in self.newgen:
+    #             self.maxcf[i] = max(self.maxcf[i], pt.cf[i])
+    #             self.mincf[i] = min(self.mincf[i], pt.cf[i])
+    #         d = self.maxcf[i] - self.mincf[i]
+    #         for j in range(self.popsize):
+    #             self.pop[j].cf[i] = (self.pop[j].cf[i] - self.mincf[i]) / d
 
     def popDominatSort(self):
         for i in range(self.popsize):
@@ -78,7 +91,71 @@ class genetic:
         random.shuffle(parent2)
         random.shuffle(parent3)
         for i in range(div):
-            pass
+            self.crossOpe(self.pop[parent1[i]].varbles, self.pop[parent2[i]].varbles)
+            self.crossOpe(
+                self.pop[parent2[i + 25]].varbles, self.pop[parent3[i]].varbles
+            )
+        for particle in self.newgen:
+            particle.varbles = self.mutation(particle.varbles)
+        self.pop = self.pop[0:parentsize] + self.newgen
 
     def crossOpe(self, pt1, pt2):
-        pass
+        l = len(pt1)
+        start1 = random.randint(0, l - 1)
+        end1 = random.randint(start1 + 1, l)
+        start2 = random.randint(0, l - 1)
+        end2 = random.randint(start2 + 1, l)
+        factor1 = pt1[start1:end1]
+        factor2 = pt2[start2:end2]
+        flag1 = np.ones(l, dtype=int)
+        flag2 = np.ones(l, dtype=int)
+        flag1[factor1] = 0
+        flag2[factor2] = 0
+        remain1 = []
+        remain2 = []
+        for i in range(end2, l):
+            if flag1[pt2[i]] == 1:
+                remain1.append(pt2[i])
+        for i in range(end2):
+            if flag1[pt2[i]] == 1:
+                remain1.append(pt2[i])
+        for i in range(end1, l):
+            if flag2[pt1[i]] == 1:
+                remain2.append(pt1[i])
+        for i in range(end1):
+            if flag2[pt1[i]] == 1:
+                remain2.append(pt1[i])
+
+        remain1 = np.array(remain1)
+        remain2 = np.array(remain2)
+        child1 = np.concatenate([remain1[l - end1 :], factor1, remain1[0 : l - end1]])
+        child2 = np.concatenate([remain2[l - end2 :], factor2, remain2[0 : l - end2]])
+        self.newgen.append(particle(child1))
+        self.newgen.append(particle(child2))
+
+    def mutation(self, sequence):
+        sequenceLength = len(sequence)
+        ismutation = random.random()
+        if ismutation < self.mutationProbability:
+            mutationPointA = random.randint(0, sequenceLength - 1)
+            mutationPointB = random.randint(0, sequenceLength - 1)
+            while mutationPointA == mutationPointB:
+                mutationPointB = random.randint(0, sequenceLength - 1)
+            sequence[mutationPointA], sequence[mutationPointB] = (
+                sequence[mutationPointB],
+                sequence[mutationPointA],
+            )
+            return sequence
+        return sequence
+
+    def evalution(self, endGeneration):
+        self.gen = 0
+        self.popInit()
+        while self.gen < endGeneration:
+            self.computeCostfunction()
+            self.popDominatSort()
+            self.popDistense()
+            self.generateNewpop()
+            self.gen += 1
+            print("Processing genetation " + str(self.gen) + "...")
+            print("Maxcf: " + str(self.maxcf) + "Mincf: " + str(self.mincf))
